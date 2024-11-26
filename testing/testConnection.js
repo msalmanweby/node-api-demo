@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const uri = "mongodb://172.30.55.119:27017";
+const uri = "mongodb://localhost:27017";
 
 mongoose
   .connect(uri)

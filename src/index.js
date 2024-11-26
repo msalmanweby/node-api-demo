@@ -8,26 +8,12 @@ import { Demo } from "./models/Demo.js";
 import { ChatGroq } from "@langchain/groq";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
+const uri = "mongodb://host.docker.internal:27017";
+
 mongoose
-  .connect(
-    process.env.NODE_ENV === "production"
-      ? process.env.PROD_DB_URI
-      : "mongodb://localhost:27017/localdb",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() => {
-    console.log(
-      `Connected to MongoDB (${
-        process.env.NODE_ENV === "production" ? "Production" : "Local"
-      })`
-    );
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
-  });
+  .connect(uri)
+  .then(() => console.log("Connected to MongoDB successfully!"))
+  .catch((err) => console.error("Error connecting to MongoDB:", err));
 
 const app = express();
 const port = 3000;
@@ -35,6 +21,7 @@ const port = 3000;
 // Middleware to parse JSON data from requests
 app.use(express.json());
 
+// API route for handling the queryBot answers
 app.post("/api/queryBot", async (req, res) => {
   try {
     const { query } = req.body;
@@ -78,14 +65,45 @@ app.post("/api/contact", (req, res) => {
     return res.status(400).json({ error: "All fields are required." });
   }
 
-  // Simulate saving the data or handling it
-  console.log("Contact Data Received:", { name, email, message });
+  const contact = new Contact({ name: name, email: email, message: message });
 
-  // Respond to the client
+  contact.save();
+
   res.status(200).json({
     success: true,
-    message: "Thank you for reaching out!",
-    data: { name, email, message },
+    message: "Request Processed Successfully",
+  });
+});
+
+// API route for handling the demo form data
+app.post("/api/demo", (req, res) => {
+  const {
+    fname,
+    lname,
+    email,
+    company,
+    categories,
+    country,
+    phone_number,
+    message,
+  } = req.body;
+
+  const demo = new Demo({
+    fname: fname,
+    lname: lname,
+    email: email,
+    company: company,
+    categories: categories,
+    country: country,
+    phone_number: phone_number,
+    message: message,
+  });
+
+  demo.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Request Processed Successfully",
   });
 });
 
