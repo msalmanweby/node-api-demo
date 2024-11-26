@@ -1,0 +1,37 @@
+# Node modules
+/node_modules/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+
+# npm package-lock file
+package-lock.json
+
+# Yarn
+yarn.lock
+
+# Temporary build files
+/dist
+/build
+
+# Debug files
+.vscode/
+.idea/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Tests and coverage directories
+/coverage
+/tests
+
+# Other editor configurations
+*.suo
+*.user
+*.userosscache
+*.sln
