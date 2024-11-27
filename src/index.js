@@ -1,22 +1,23 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import connectDB from "./db.js";
 import express from "express";
-import mongoose from "mongoose";
 import { Contact } from "./models/Contact.js";
 import { Demo } from "./models/Demo.js";
 import { ChatGroq } from "@langchain/groq";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const uri = "mongodb://host.docker.internal:27017";
+const uri =
+  process.env.NODE_ENV === "production"
+    ? process.env.PROD_DB_URI
+    : "mongodb://localhost:27017/meetai_db";
 
-mongoose
-  .connect(uri)
-  .then(() => console.log("Connected to MongoDB successfully!"))
-  .catch((err) => console.error("Error connecting to MongoDB:", err));
+// Initialize the database connection
+connectDB(uri);
 
+// Initialize the database connection
 const app = express();
-const port = 3000;
 
 // Middleware to parse JSON data from requests
 app.use(express.json());
@@ -35,7 +36,7 @@ app.post("/api/queryBot", async (req, res) => {
     });
 
     const systemPrompt =
-      "You are a project manager and marketing agent of Meetaicoders, a software company specializing in technology solutions. You will answer general questions only about technology within your expertise. For irrelevant or out-of-scope questions, politely excuse yourself by stating you do not have an answer, and follow up with a related question about Meetaicoders' services or expertise. Keep responses concise and focused.";
+      "You are a project manager and marketing agent of Meetaicoders, a software company specializing in technology solutions. You will answer general questions only about technology within your expertise. For irrelevant or out-of-scope questions, politely excuse yourself by stating you do not have an answer, and follow up with a related question about Meetaicoders' services or expertise. Keep responses short, concise and focused. Donot generate lengthy responses. Strictly follow the guidelines";
 
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", systemPrompt],
@@ -58,55 +59,72 @@ app.post("/api/queryBot", async (req, res) => {
 });
 
 // API route for handling the contact form data
-app.post("/api/contact", (req, res) => {
-  const { name, email, message } = req.body;
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
 
-  if (!name || !email || !message) {
-    return res.status(400).json({ error: "All fields are required." });
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const contact = new Contact({ name: name, email: email, message: message });
+
+    await contact.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Request Processed Successfully",
+    });
+  } catch (error) {
+    // Handle errors gracefully
+    console.error("Error occurred:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while processing the request." });
   }
-
-  const contact = new Contact({ name: name, email: email, message: message });
-
-  contact.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Request Processed Successfully",
-  });
 });
 
 // API route for handling the demo form data
-app.post("/api/demo", (req, res) => {
-  const {
-    fname,
-    lname,
-    email,
-    company,
-    categories,
-    country,
-    phone_number,
-    message,
-  } = req.body;
+app.post("/api/demo", async (req, res) => {
+  try {
+    const {
+      fname,
+      lname,
+      email,
+      company,
+      categories,
+      country,
+      phone_number,
+      message,
+    } = req.body;
 
-  const demo = new Demo({
-    fname: fname,
-    lname: lname,
-    email: email,
-    company: company,
-    categories: categories,
-    country: country,
-    phone_number: phone_number,
-    message: message,
-  });
+    const demo = new Demo({
+      fname: fname,
+      lname: lname,
+      email: email,
+      company: company,
+      categories: categories,
+      country: country,
+      phone_number: phone_number,
+      message: message,
+    });
 
-  demo.save();
+    await demo.save();
 
-  res.status(200).json({
-    success: true,
-    message: "Request Processed Successfully",
-  });
+    return res.status(200).json({
+      message: "Request Processed Successfully",
+    });
+  } catch (error) {
+    // Handle errors gracefully
+    console.error("Error occurred:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while processing the request." });
+  }
 });
 
+// Initialize the port for application
+const port = 3000;
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`App listening on port ${port}`);
 });
