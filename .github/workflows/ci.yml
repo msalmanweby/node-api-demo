@@ -1,0 +1,42 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code from the repo
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build Docker image and push to Docker Hub
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/your-app-name:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/your-app-name:latest
+
+    #   # Deploy to Render (you can use a Render CLI or API)
+    #   - name: Deploy to Render
+    #     run: |
+    #       curl -sSL https://render.com/cli | bash
+    #       render login --api-key ${{ secrets.RENDER_API_KEY }}
+    #       render deploy --service your-service-name --docker-image ${{ secrets.DOCKER_USERNAME }}/your-app-name:latest
