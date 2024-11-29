@@ -8,10 +8,7 @@ import { Demo } from "./models/Demo.js";
 import { ChatGroq } from "@langchain/groq";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const uri =
-  process.env.NODE_ENV === "production"
-    ? process.env.PROD_DB_URI
-    : "mongodb://localhost:27017/meetai_db";
+const uri = process.env.PROD_DB_URI || "mongodb://localhost:27017/meetai_db";
 
 // Initialize the database connection
 connectDB(uri);
@@ -125,6 +122,6 @@ app.post("/api/demo", async (req, res) => {
 
 // Initialize the port for application
 const port = 3000;
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`App listening on port ${port}`);
 });
