@@ -13,7 +13,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci --only=production
 
-# Set the root user to node
+# # Set the root user to node
 USER node
 
 # Copy the rest of the application code

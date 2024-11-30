@@ -7,4 +7,6 @@ const ContactScheme = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now },
 });
 
-export const Contact = mongoose.model("Contact", ContactScheme);
+const Contact = mongoose.model("Contact", ContactScheme);
+
+export { Contact };

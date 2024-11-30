@@ -11,4 +11,6 @@ const demoSchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now },
 });
 
-export const Demo = mongoose.model("Demo", demoSchema);
+const Demo = mongoose.model("Demo", demoSchema);
+
+export { Demo };

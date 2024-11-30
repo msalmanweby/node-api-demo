@@ -1,0 +1,39 @@
+services:
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    restart: always
+    volumes:
+      - mongo_data:/data/db # This persists MongoDB data
+    networks:
+      - meetai-network
+    ports:
+      - "27017:27017" # Exposes the MongoDB port to the host machine
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "3000:3000"
+    environment:
+      - GROQ_API_KEY=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
+    volumes:
+      - type: bind
+        source: ./src # This mounts your local 'src' directory to the container's 'src'
+        target: /usr/src/app # This mounts your local 'src' directory to the container's 'src'
+      - type: volume
+        target: /usr/src/app/node_modules # This mounts your local 'src' directory to the container's 'src'
+    networks:
+      - meetai-network
+    restart: unless-stopped
+    depends_on:
+      - mongo-db # Ensure the backend starts after MongoDB
+
+networks:
+  meetai-network:
+    driver: bridge
+
+volumes:
+  mongo_data: # This defines a named volume for MongoDB data persistence
