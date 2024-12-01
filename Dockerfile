@@ -1,12 +1,12 @@
 # Use Node.js Alpine image
-FROM node:19.6-alpine as base
+FROM node:19.6-alpine AS base
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
 # Devlopment Stage
-FROM base as dev
+FROM base AS dev
 
 # Install including dev dependencies
 RUN npm install
@@ -18,7 +18,7 @@ COPY . .
 CMD ["npm", "run", "dev"]
 
 # Production Stage
-FROM base as production
+FROM base AS production
 
 # Set the environment
 ENV NODE_ENV=production
